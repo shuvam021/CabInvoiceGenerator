@@ -1,31 +1,32 @@
 using System;
+using System.Linq;
 using CabInvoiceGenerator.Utils;
 
 namespace CabInvoiceGenerator
 {
     public class InvoiceGenerator
     {
-        RideType rideType;
-        public readonly int MINIMUM_FAIR;
-        public readonly int COST_PER_TIME;
-        public readonly int MINIMUM_COST_PER_KM;
+        private RideType _rideType;
+        private readonly int _minimumFair;
+        private readonly int _costPerTime;
+        private readonly int _minimumCostPerKm;
 
         /// <summary>Generate Cab Service Invoices</summary>
         public InvoiceGenerator(RideType type)
         {
-            rideType = type;
+            _rideType = type;
 
             if (type == RideType.Normal)
             {
-                this.MINIMUM_COST_PER_KM = 10;
-                this.COST_PER_TIME = 1;
-                this.MINIMUM_FAIR = 5;
+                this._minimumCostPerKm = 10;
+                this._costPerTime = 1;
+                this._minimumFair = 5;
             }
             else if (type == RideType.Premium)
             {
-                this.MINIMUM_COST_PER_KM = 10;
-                this.COST_PER_TIME = 1;
-                this.MINIMUM_FAIR = 5;
+                this._minimumCostPerKm = 15;
+                this._costPerTime = 2;
+                this._minimumFair = 20;
             }
             else
             {
@@ -43,8 +44,20 @@ namespace CabInvoiceGenerator
                 throw new CabInvoiceException(ExceptionType.InvalidDistance);
             if (time <= 0)
                 throw new CabInvoiceException(ExceptionType.InvalidTime);
-            double totalFare = (distance * MINIMUM_COST_PER_KM) + (time * COST_PER_TIME);
-            return Math.Max(totalFare, MINIMUM_FAIR);
+            double totalFare = (distance * _minimumCostPerKm) + (time * _costPerTime);
+            return Math.Max(totalFare, _minimumFair);
+        }
+        
+        /// <summary>fare calculation from given Array of Ride object</summary>
+        /// <param name="rides">Array of Ride object</param>
+        /// <returns>Returns Total fare in Double</returns>
+        public double CalculateFare(Ride[] rides)
+        {
+            double totalFare = 0;
+            if(rides == null || rides.Length == 0)
+                throw new CabInvoiceException(ExceptionType.NullRides);
+            totalFare += rides.Sum(item => CalculateFare(item.Distance, item.Time));
+            return Math.Max(totalFare, _minimumFair);
         }
     }
 }
