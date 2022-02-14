@@ -47,17 +47,18 @@ namespace CabInvoiceGenerator
             double totalFare = (distance * _minimumCostPerKm) + (time * _costPerTime);
             return Math.Max(totalFare, _minimumFair);
         }
-        
+
         /// <summary>fare calculation from given Array of Ride object</summary>
         /// <param name="rides">Array of Ride object</param>
         /// <returns>Returns Total fare in Double</returns>
-        public double CalculateFare(Ride[] rides)
+        public InvoiceSummary CalculateFare(Ride[] rides)
         {
             double totalFare = 0;
             if(rides == null || rides.Length == 0)
                 throw new CabInvoiceException(ExceptionType.NullRides);
             totalFare += rides.Sum(item => CalculateFare(item.Distance, item.Time));
-            return Math.Max(totalFare, _minimumFair);
+            var result = Math.Max(totalFare, _minimumFair);
+            return new InvoiceSummary(rides.Length, result);
         }
     }
 }
